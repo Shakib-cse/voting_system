@@ -1,5 +1,12 @@
 <?php
+session_start();
 require_once 'config/db.php';
+
+// Generate a random seed for the session to ensure stable pagination while randomizing the order
+if (!isset($_SESSION['voting_seed'])) {
+    $_SESSION['voting_seed'] = rand(1, 999999);
+}
+$seed = $_SESSION['voting_seed'];
 
 // 1. Get Category filter (Default to '9-11' to match the active tab in the image)
 $selected_category = $_GET['category'] ?? '9-11';
@@ -20,8 +27,9 @@ try {
     $total_records = $count_stmt->fetchColumn();
     $total_pages = ceil($total_records / $limit);
 
-    // 4. Fetch participants for the current page (ORDER BY views ASC, id ASC for Equal Chance Logic)
-    $stmt = $pdo->prepare("SELECT * FROM $table_name ORDER BY views ASC, id ASC LIMIT :limit OFFSET :offset");
+    // 4. Fetch participants for the current page (ORDER BY views ASC, RAND($seed) for Equal Chance + True Random Logic)
+    $stmt = $pdo->prepare("SELECT * FROM $table_name ORDER BY views ASC, RAND(:seed) LIMIT :limit OFFSET :offset");
+    $stmt->bindValue(':seed', $seed, PDO::PARAM_INT);
     $stmt->bindValue(':limit', $limit, PDO::PARAM_INT);
     $stmt->bindValue(':offset', $offset, PDO::PARAM_INT);
     $stmt->execute();
