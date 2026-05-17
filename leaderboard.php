@@ -2,12 +2,18 @@
 require_once 'config/db.php';
 
 try {
-    // Fetch participants and their vote counts
+    // Fetch participants from all three tables and join with confirmed votes
     $stmt = $pdo->query("
         SELECT p.*, COUNT(v.id) AS vote_count 
-        FROM participants p 
-        LEFT JOIN votes v ON p.username_id = v.username_id 
-        GROUP BY p.id 
+        FROM (
+            SELECT '9-11' AS age_category, id, username_id, name, email, page_1, page_2, page_3, views, created_at FROM participants_9_11
+            UNION ALL
+            SELECT '12-14' AS age_category, id, username_id, name, email, page_1, page_2, page_3, views, created_at FROM participants_12_14
+            UNION ALL
+            SELECT '15-17' AS age_category, id, username_id, name, email, page_1, page_2, page_3, views, created_at FROM participants_15_17
+        ) p
+        LEFT JOIN votes v ON p.username_id = v.username_id AND v.is_confirmed = 1
+        GROUP BY p.username_id 
         ORDER BY vote_count DESC, p.id DESC
     ");
     $leaderboard = $stmt->fetchAll();

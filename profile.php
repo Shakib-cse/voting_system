@@ -9,10 +9,20 @@ if (empty($username_id)) {
 }
 
 try {
-    // Fetch participant details
-    $stmt = $pdo->prepare("SELECT * FROM participants WHERE username_id = ?");
-    $stmt->execute([$username_id]);
-    $participant = $stmt->fetch();
+    // Fetch participant details by searching across category-specific tables
+    $participant = null;
+    $selected_category = '';
+    foreach (['9-11', '12-14', '15-17'] as $cat) {
+        $tbl = "participants_" . str_replace('-', '_', $cat);
+        $stmt = $pdo->prepare("SELECT * FROM $tbl WHERE username_id = ?");
+        $stmt->execute([$username_id]);
+        $res = $stmt->fetch();
+        if ($res) {
+            $participant = $res;
+            $selected_category = $cat;
+            break;
+        }
+    }
 
     if (!$participant) {
         die("<h2>Participant not found!</h2><a href='index.php'>Go back</a>");
@@ -121,8 +131,17 @@ try {
         <!-- PORTFOLIO HEADER -->
         <div class="portfolio-header">
             <h2 class="portfolio-title"><?= htmlspecialchars($participant->name) ?>'s Portfolio</h2>
-            <div class="portfolio-age">Age Category: <?= htmlspecialchars($participant->age_category) ?> Years</div>
+            <div class="portfolio-age">Age Category: <?= htmlspecialchars($selected_category) ?> Years</div>
         </div>
+
+        <!-- MULTIPLE PAGES CONDITIONAL BANNER -->
+        <?php if (count($artworks) > 1): ?>
+            <div class="multiple-pages-banner" style="background:#e6f7ff; border:3px solid var(--border-color); border-radius:12px; padding:20px; text-align:center; font-family:var(--font-heading); font-weight:700; color:var(--text-main); margin-bottom:35px; font-size:1.1rem; box-shadow: 0px 6px 0px var(--border-color); display:flex; align-items:center; justify-content:center; gap:10px;">
+                <!-- Book icon SVG -->
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path></svg>
+                This comic book entry has multiple pages! Read all entries below and cast your vote!
+            </div>
+        <?php endif; ?>
 
         <!-- ARTWORKS GALLERY -->
         <div class="artworks-grid">
@@ -152,7 +171,14 @@ try {
             <h3 id="vote-modal-title" class="modal-title">Cast Vote</h3>
             
             <form id="vote-form">
+                <input type="hidden" id="vote-age-category" value="<?= htmlspecialchars($selected_category) ?>">
+                
                 <div class="form-group">
+                    <label class="form-label" for="voter-name">Your Full Name</label>
+                    <input type="text" id="voter-name" class="form-input" placeholder="e.g. John Doe" required>
+                </div>
+
+                <div class="form-group" style="margin-top:15px;">
                     <label class="form-label" for="voter-email">Your Email Address</label>
                     <input type="email" id="voter-email" class="form-input" placeholder="e.g. yourname@example.com" required>
                     <span style="font-size:0.8rem; color:var(--text-muted); margin-top:5px;">We strictly limit voting to 1 vote per email address to prevent duplicate votes.</span>

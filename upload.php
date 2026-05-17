@@ -21,11 +21,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     } elseif (empty($_FILES['page_1']['name'])) {
         $error_msg = 'Page 1 image is required!';
     } else {
-        // Check if Username_ID is already taken
+        // Check if Username_ID is already taken in any category-specific table
         try {
-            $stmt = $pdo->prepare("SELECT COUNT(*) FROM participants WHERE username_id = ?");
-            $stmt->execute([$username_id]);
-            if ($stmt->fetchColumn() > 0) {
+            $is_taken = false;
+            foreach (['9_11', '12_14', '15_17'] as $tbl_cat) {
+                $stmt = $pdo->prepare("SELECT COUNT(*) FROM participants_$tbl_cat WHERE username_id = ?");
+                $stmt->execute([$username_id]);
+                if ($stmt->fetchColumn() > 0) {
+                    $is_taken = true;
+                    break;
+                }
+            }
+            if ($is_taken) {
                 $error_msg = "The Username ID '<strong>$username_id</strong>' is already taken. Please choose another one.";
             }
         } catch (PDOException $e) {
@@ -84,11 +91,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
             if ($upload_ok) {
                 try {
-                    $stmt = $pdo->prepare("INSERT INTO participants (username_id, name, age_category, email, page_1, page_2, page_3) VALUES (?, ?, ?, ?, ?, ?, ?)");
+                    $tbl = "participants_" . str_replace('-', '_', $age_category);
+                    $stmt = $pdo->prepare("INSERT INTO $tbl (username_id, name, email, page_1, page_2, page_3) VALUES (?, ?, ?, ?, ?, ?)");
                     $stmt->execute([
                         $username_id,
                         $name,
-                        $age_category,
                         $email,
                         $uploaded_files['page_1'],
                         $uploaded_files['page_2'],

@@ -1,5 +1,12 @@
 <?php
+session_start();
 require_once 'config/db.php';
+
+// Generate a random seed for the session to ensure stable pagination while randomizing the order
+if (!isset($_SESSION['voting_seed'])) {
+    $_SESSION['voting_seed'] = rand(1, 999999);
+}
+$seed = $_SESSION['voting_seed'];
 
 // 1. Get Category filter (Default to '9-11' to match the active tab in the image)
 $selected_category = $_GET['category'] ?? '9-11';
@@ -12,20 +19,29 @@ $limit = 15; // 15 cards per page as per requirement
 $page = isset($_GET['page']) ? max(1, (int)$_GET['page']) : 1;
 $offset = ($page - 1) * $limit;
 
+$table_name = "participants_" . str_replace('-', '_', $selected_category);
+
 try {
     // 3. Count total participants in active category
-    $count_stmt = $pdo->prepare("SELECT COUNT(*) FROM participants WHERE age_category = ?");
-    $count_stmt->execute([$selected_category]);
+    $count_stmt = $pdo->query("SELECT COUNT(*) FROM $table_name");
     $total_records = $count_stmt->fetchColumn();
     $total_pages = ceil($total_records / $limit);
 
-    // 4. Fetch participants for the current page
-    $stmt = $pdo->prepare("SELECT * FROM participants WHERE age_category = :category ORDER BY id DESC LIMIT :limit OFFSET :offset");
-    $stmt->bindValue(':category', $selected_category, PDO::PARAM_STR);
+    // 4. Fetch participants for the current page (ORDER BY views ASC, RAND($seed) for Equal Chance + True Random Logic)
+    $stmt = $pdo->prepare("SELECT * FROM $table_name ORDER BY views ASC, RAND(:seed) LIMIT :limit OFFSET :offset");
+    $stmt->bindValue(':seed', $seed, PDO::PARAM_INT);
     $stmt->bindValue(':limit', $limit, PDO::PARAM_INT);
     $stmt->bindValue(':offset', $offset, PDO::PARAM_INT);
     $stmt->execute();
     $participants = $stmt->fetchAll();
+
+    // 5. Increment views for the displayed participants (+1 viewed every time)
+    if (count($participants) > 0) {
+        $ids = array_map(function($p) { return $p->username_id; }, $participants);
+        $placeholders = implode(',', array_fill(0, count($ids), '?'));
+        $update_stmt = $pdo->prepare("UPDATE $table_name SET views = views + 1 WHERE username_id IN ($placeholders)");
+        $update_stmt->execute($ids);
+    }
 
 } catch (PDOException $e) {
     die("Query failed: " . $e->getMessage());
@@ -60,8 +76,7 @@ try {
                     <span class="logo-sub">Tekenwedstrijd</span>
                 </div>
             </div>
-
-            <!-- Festival Banner Burst (Top Right) -->
+<!-- Festival Banner Burst (Top Right) -->
             <div class="festival-banner">
                 <div class="festival-text">
                     Rode Strip Festival
@@ -106,8 +121,7 @@ try {
                 Register &amp; Submit Comic
             </a>
         </div>
-
-        <!-- PARTICIPANTS GRID -->
+<!-- PARTICIPANTS GRID -->
         <?php if (count($participants) > 0): ?>
             <div class="participants-grid">
                 <?php foreach ($participants as $p): ?>
@@ -175,8 +189,7 @@ try {
                             <?= $i ?>
                         </button>
                     <?php endfor; ?>
-
-                    <?php if ($page < $total_pages): ?>
+<?php if ($page < $total_pages): ?>
                         <button onclick="location.href='index.php?category=<?= $selected_category ?>&page=<?= $page + 1 ?>'" class="pagination-item">Next &gt;</button>
                     <?php endif; ?>
                 </div>
@@ -210,7 +223,14 @@ try {
             <h3 id="vote-modal-title" class="modal-title">Cast Vote</h3>
             
             <form id="vote-form">
+                <input type="hidden" id="vote-age-category" value="<?= htmlspecialchars($selected_category) ?>">
+                
                 <div class="form-group">
+                    <label class="form-label" for="voter-name">Your Full Name</label>
+                    <input type="text" id="voter-name" class="form-input" placeholder="e.g. John Doe" required>
+                </div>
+
+                <div class="form-group" style="margin-top:15px;">
                     <label class="form-label" for="voter-email">Your Email Address</label>
                     <input type="email" id="voter-email" class="form-input" placeholder="e.g. yourname@example.com" required>
                     <span style="font-size:0.8rem; color:var(--text-muted); margin-top:5px;">We strictly limit voting to 1 vote per email address to prevent duplicate votes.</span>
@@ -228,8 +248,7 @@ try {
             </form>
         </div>
     </div>
-
-    <!-- COMIC VIEWER MODAL -->
+<!-- COMIC VIEWER MODAL -->
     <div id="comic-modal" class="modal-overlay">
         <div class="modal-card" style="max-width:650px; padding:25px;">
             <button class="modal-close" onclick="closeComicViewer()">&times;</button>
