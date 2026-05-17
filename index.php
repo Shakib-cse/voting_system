@@ -1,0 +1,258 @@
+<?php
+require_once 'config/db.php';
+
+// 1. Get Category filter (Default to '9-11' to match the active tab in the image)
+$selected_category = $_GET['category'] ?? '9-11';
+if (!in_array($selected_category, ['9-11', '12-14', '15-17'])) {
+    $selected_category = '9-11';
+}
+
+// 2. Pagination variables
+$limit = 15; // 15 cards per page as per requirement
+$page = isset($_GET['page']) ? max(1, (int)$_GET['page']) : 1;
+$offset = ($page - 1) * $limit;
+
+try {
+    // 3. Count total participants in active category
+    $count_stmt = $pdo->prepare("SELECT COUNT(*) FROM participants WHERE age_category = ?");
+    $count_stmt->execute([$selected_category]);
+    $total_records = $count_stmt->fetchColumn();
+    $total_pages = ceil($total_records / $limit);
+
+    // 4. Fetch participants for the current page
+    $stmt = $pdo->prepare("SELECT * FROM participants WHERE age_category = :category ORDER BY id DESC LIMIT :limit OFFSET :offset");
+    $stmt->bindValue(':category', $selected_category, PDO::PARAM_STR);
+    $stmt->bindValue(':limit', $limit, PDO::PARAM_INT);
+    $stmt->bindValue(':offset', $offset, PDO::PARAM_INT);
+    $stmt->execute();
+    $participants = $stmt->fetchAll();
+
+} catch (PDOException $e) {
+    die("Query failed: " . $e->getMessage());
+}
+?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NK Strip Voting - Comic Book Drawing Competition</title>
+    <link rel="stylesheet" href="assets/style.css">
+</head>
+<body>
+    <div class="container">
+        <!-- HEADER -->
+        <header>
+            <div class="logo-container">
+                <!-- SVG Draw Girl / Comic Mascot -->
+                <svg width="64" height="64" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg" style="transform: rotate(-5deg); filter: drop-shadow(2px 3px 0px #1a1a1a);">
+                    <circle cx="32" cy="32" r="30" fill="#ffeb3b" stroke="#1a1a1a" stroke-width="3"/>
+                    <!-- Pencil -->
+                    <path d="M18 46L24 40L42 22C44 20 47 20 49 22C51 24 51 27 49 29L31 47L25 47L18 46Z" fill="#2196f3" stroke="#1a1a1a" stroke-width="2.5"/>
+                    <path d="M42 22L47 27" stroke="#1a1a1a" stroke-width="2.5"/>
+                    <path d="M18 46L21 43L24 40L25 47L18 46Z" fill="#ff8a80" stroke="#1a1a1a" stroke-width="1.5"/>
+                    <!-- Star Sparkles -->
+                    <path d="M12 18L14 14L18 12L14 10L12 6L10 10L6 12L10 14L12 18Z" fill="#ff5722"/>
+                    <path d="M48 45L49 42L52 41L49 40L48 37L47 40L44 41L47 42L48 45Z" fill="#e91e63"/>
+                </svg>
+                <div>
+                    <h1 class="logo-text"><a href="index.php">NK Strip</a></h1>
+                    <span class="logo-sub">Tekenwedstrijd</span>
+                </div>
+            </div>
+
+            <!-- Festival Banner Burst (Top Right) -->
+            <div class="festival-banner">
+                <div class="festival-text">
+                    Rode Strip Festival
+                    <span>Finale tijdens het Leids Strip Festival</span>
+                </div>
+                <!-- SVG Explosive Starburst -->
+                <svg class="festival-burst" width="70" height="70" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg" style="filter: drop-shadow(2px 3px 0px #1a1a1a);">
+                    <path d="M50 0L59 28L88 12L72 38L100 50L72 62L88 88L59 72L50 100L41 72L12 88L28 62L0 50L28 38L12 12L41 28L50 0Z" fill="#ffc107" stroke="#1a1a1a" stroke-width="3"/>
+                    <path d="M50 12L56 32L77 20L65 40L85 50L65 60L77 80L56 68L50 88L44 68L23 80L35 60L15 50L35 40L23 20L44 32L50 12Z" fill="#ff5722"/>
+                    <circle cx="50" cy="50" r="12" fill="#d32f2f"/>
+                </svg>
+            </div>
+        </header>
+
+        <!-- CATEGORIES AS COMIC SPEECH BUBBLES -->
+        <div class="categories-container">
+            <button onclick="location.href='index.php?category=9-11'" class="bubble-tab <?= $selected_category === '9-11' ? 'active' : '' ?>">
+                9-11 Jaar
+            </button>
+            <button onclick="location.href='index.php?category=12-14'" class="bubble-tab <?= $selected_category === '12-14' ? 'active' : '' ?>">
+                12-14 Jaar
+            </button>
+            <button onclick="location.href='index.php?category=15-17'" class="bubble-tab <?= $selected_category === '15-17' ? 'active' : '' ?>">
+                15-17 Jaar
+            </button>
+        </div>
+
+        <!-- INTROTEXT -->
+        <div class="intro-text-box">
+            Hier komt een tekst over de verkiezingen. Kies hieronder je favoriete striptekening van de finalisten en breng direct je stem uit om jouw favoriet te steunen!
+        </div>
+
+        <div style="display: flex; justify-content: flex-end; gap: 15px; margin-bottom: 25px;">
+            <a href="leaderboard.php" class="btn btn-secondary" style="border-color:var(--accent-color); color:var(--accent-color); font-weight:700;">
+                <!-- Trophy Icon -->
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"></path><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"></path><path d="M4 22h16"></path><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"></path><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"></path><path d="M18 2H6v7a6 6 0 0 0 12 0V2z"></path></svg>
+                View Leaderboard
+            </a>
+            <a href="upload.php" class="btn btn-secondary" style="border-color:var(--text-main); font-weight:700;">
+                <!-- Register / Upload Icon -->
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="12" y1="18" x2="12" y2="12"></line><line x1="9" y1="15" x2="15" y2="15"></line></svg>
+                Register &amp; Submit Comic
+            </a>
+        </div>
+
+        <!-- PARTICIPANTS GRID -->
+        <?php if (count($participants) > 0): ?>
+            <div class="participants-grid">
+                <?php foreach ($participants as $p): ?>
+                    <?php 
+                        // Determine pages available
+                        $pages = array_filter([$p->page_1, $p->page_2, $p->page_3]);
+                        $page_count = count($pages);
+                        $pages_json = rawurlencode(json_encode(array_values($pages)));
+                        
+                        // Card classes based on page counts
+                        $stack_class = '';
+                        if ($page_count == 2) {
+                            $stack_class = 'has-2-pages';
+                        } elseif ($page_count >= 3) {
+                            $stack_class = 'has-3-pages';
+                        }
+                    ?>
+                    <div class="participant-card">
+                        <h3 class="card-title"><?= htmlspecialchars($p->name) ?></h3>
+                        
+                        <!-- Layered Stack Container - now links to profile -->
+                        <div class="image-stack-container <?= $stack_class ?>" onclick="location.href='profile.php?id=<?= urlencode($p->username_id) ?>'">
+                            <!-- Optional layer 2 for 3 pages -->
+                            <?php if ($page_count >= 3): ?>
+                                <div class="stack-layer stack-layer-2"></div>
+                            <?php endif; ?>
+
+                            <!-- Optional layer 1 for >=2 pages -->
+                            <?php if ($page_count >= 2): ?>
+                                <div class="stack-layer stack-layer-1"></div>
+                            <?php endif; ?>
+
+                            <!-- Primary/Top image card -->
+                            <div class="image-card">
+                                <img src="<?= htmlspecialchars($p->page_1) ?>" alt="Comic of <?= htmlspecialchars($p->name) ?>" loading="lazy">
+                            </div>
+
+                            <!-- Page count badge overlay -->
+                            <span class="page-count-badge">
+                                <?= $page_count ?> Page<?= $page_count > 1 ? 's' : '' ?>
+                            </span>
+                        </div>
+
+                        <!-- View Profile & Vote Button -->
+                        <button onclick="location.href='profile.php?id=<?= urlencode($p->username_id) ?>'" class="btn btn-primary" style="background-color: var(--text-main);">
+                            <!-- Eye icon -->
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+                            View Profile & Vote
+                        </button>
+                    </div>
+                <?php endforeach; ?>
+            </div>
+
+            <!-- PAGINATION -->
+            <?php if ($total_pages > 1): ?>
+                <div class="pagination">
+                    <span style="font-family:var(--font-heading); font-weight:700; color:var(--text-muted); margin-right:8px;">pages:</span>
+                    
+                    <?php if ($page > 1): ?>
+                        <button onclick="location.href='index.php?category=<?= $selected_category ?>&page=<?= $page - 1 ?>'" class="pagination-item">&lt;</button>
+                    <?php endif; ?>
+
+                    <?php for ($i = 1; $i <= $total_pages; $i++): ?>
+                        <button onclick="location.href='index.php?category=<?= $selected_category ?>&page=<?= $i ?>'" class="pagination-item <?= $page === $i ? 'active' : '' ?>">
+                            <?= $i ?>
+                        </button>
+                    <?php endfor; ?>
+
+                    <?php if ($page < $total_pages): ?>
+                        <button onclick="location.href='index.php?category=<?= $selected_category ?>&page=<?= $page + 1 ?>'" class="pagination-item">Next &gt;</button>
+                    <?php endif; ?>
+                </div>
+            <?php endif; ?>
+
+        <?php else: ?>
+            <div style="text-align:center; padding:60px 20px; background:#fff; border:3px dashed var(--border-color); border-radius:12px; margin:40px 0;">
+                <!-- Sad emoji or search slash icon -->
+                <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color:var(--text-muted); margin-bottom:15px;"><circle cx="12" cy="12" r="10"></circle><line x1="8" y1="15" x2="16" y2="15"></line><line x1="9" y1="9" x2="9.01" y2="9"></line><line x1="15" y1="9" x2="15.01" y2="9"></line></svg>
+                <h3 style="font-family:var(--font-heading); font-size:1.4rem; margin-bottom:8px;">No participants found!</h3>
+                <p style="color:var(--text-muted);">Be the first one to submit a comic for this age category!</p>
+                <a href="upload.php" class="btn btn-primary" style="margin-top:20px;">Upload Drawing Now</a>
+            </div>
+        <?php endif; ?>
+
+        <!-- FOOTER -->
+        <footer>
+            <p>&copy; 2026 NK Strip Tekenwedstrijd. All rights reserved.</p>
+            <div class="footer-links">
+                <a href="index.php">Home</a>
+                <a href="upload.php">Register Comic</a>
+                <a href="admin/login.php">Admin Panel</a>
+            </div>
+        </footer>
+    </div>
+
+    <!-- VOTE EMAIL MODAL -->
+    <div id="vote-modal" class="modal-overlay">
+        <div class="modal-card">
+            <button class="modal-close" onclick="closeVoteModal()">&times;</button>
+            <h3 id="vote-modal-title" class="modal-title">Cast Vote</h3>
+            
+            <form id="vote-form">
+                <div class="form-group">
+                    <label class="form-label" for="voter-email">Your Email Address</label>
+                    <input type="email" id="voter-email" class="form-input" placeholder="e.g. yourname@example.com" required>
+                    <span style="font-size:0.8rem; color:var(--text-muted); margin-top:5px;">We strictly limit voting to 1 vote per email address to prevent duplicate votes.</span>
+                </div>
+
+                <div id="vote-feedback" class="form-group" style="display:none;"></div>
+
+                <div style="display:flex; justify-content:flex-end; gap:10px; margin-top:30px;">
+                    <button type="button" class="btn btn-secondary" onclick="closeVoteModal()">Cancel</button>
+                    <button type="submit" class="btn btn-primary">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M14 9V5a3 3 0 0 0-3-3l-4 9v11h11.28a2 2 0 0 0 2-1.7l1.38-9a2 2 0 0 0-2-2.3zM7 22H4a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h3"></path></svg>
+                        Confirm Vote
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- COMIC VIEWER MODAL -->
+    <div id="comic-modal" class="modal-overlay">
+        <div class="modal-card" style="max-width:650px; padding:25px;">
+            <button class="modal-close" onclick="closeComicViewer()">&times;</button>
+            <h3 class="modal-title" style="margin-bottom:15px; border:none; padding:0;">Comic Viewer</h3>
+            
+            <div class="comic-viewer-container">
+                <div class="comic-viewer-image-wrapper">
+                    <img id="comic-viewer-img" src="" alt="Comic page">
+                </div>
+
+                <div class="comic-viewer-controls">
+                    <button id="comic-prev" class="btn btn-secondary" onclick="prevComicPage()">
+                        &larr; Previous Page
+                    </button>
+                    <span id="page-indicator" class="page-indicator">Page 1 of 1</span>
+                    <button id="comic-next" class="btn btn-secondary" onclick="nextComicPage()">
+                        Next Page &rarr;
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="assets/script.js"></script>
+</body>
+</html>

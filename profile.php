@@ -1,0 +1,173 @@
+<?php
+require_once 'config/db.php';
+
+$username_id = $_GET['id'] ?? '';
+
+if (empty($username_id)) {
+    header("Location: index.php");
+    exit;
+}
+
+try {
+    // Fetch participant details
+    $stmt = $pdo->prepare("SELECT * FROM participants WHERE username_id = ?");
+    $stmt->execute([$username_id]);
+    $participant = $stmt->fetch();
+
+    if (!$participant) {
+        die("<h2>Participant not found!</h2><a href='index.php'>Go back</a>");
+    }
+
+    // Get all available pages/artworks
+    $artworks = array_filter([$participant->page_1, $participant->page_2, $participant->page_3]);
+
+} catch (PDOException $e) {
+    die("Error fetching participant: " . $e->getMessage());
+}
+?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><?= htmlspecialchars($participant->name) ?>'s Portfolio - NK Strip</title>
+    <link rel="stylesheet" href="assets/style.css">
+    <style>
+        .portfolio-header {
+            text-align: center;
+            margin-bottom: 40px;
+            padding: 30px;
+            background: #fff;
+            border: 3px solid var(--border-color);
+            border-radius: 12px;
+            box-shadow: 0px 8px 0px var(--border-color);
+        }
+        .portfolio-title {
+            font-family: var(--font-heading);
+            font-size: 2.5rem;
+            font-weight: 900;
+            color: var(--text-main);
+            margin-bottom: 10px;
+        }
+        .portfolio-age {
+            display: inline-block;
+            background: var(--primary-color);
+            color: #fff;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-weight: bold;
+            font-size: 1.1rem;
+            border: 2px solid var(--border-color);
+        }
+        .artworks-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px;
+            margin-bottom: 50px;
+        }
+        .artwork-card {
+            background: #fff;
+            padding: 15px;
+            border: 3px solid var(--border-color);
+            border-radius: 12px;
+            box-shadow: 0px 6px 0px var(--border-color);
+        }
+        .artwork-card img {
+            width: 100%;
+            height: auto;
+            border-radius: 8px;
+            border: 2px solid var(--border-color);
+        }
+        .vote-section {
+            text-align: center;
+            margin: 40px 0;
+        }
+        .vote-btn-large {
+            font-size: 1.5rem;
+            padding: 15px 40px;
+            background-color: var(--accent-color);
+            color: #fff;
+        }
+        .vote-btn-large:hover {
+            background-color: #d9363e;
+            transform: translateY(-3px);
+            box-shadow: 0px 8px 0px var(--border-color);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- HEADER -->
+        <header>
+            <div class="logo-container">
+                <svg width="64" height="64" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg" style="transform: rotate(-5deg); filter: drop-shadow(2px 3px 0px #1a1a1a);">
+                    <circle cx="32" cy="32" r="30" fill="#ffeb3b" stroke="#1a1a1a" stroke-width="3"/>
+                    <path d="M18 46L24 40L42 22C44 20 47 20 49 22C51 24 51 27 49 29L31 47L25 47L18 46Z" fill="#2196f3" stroke="#1a1a1a" stroke-width="2.5"/>
+                    <path d="M42 22L47 27" stroke="#1a1a1a" stroke-width="2.5"/>
+                    <path d="M18 46L21 43L24 40L25 47L18 46Z" fill="#ff8a80" stroke="#1a1a1a" stroke-width="1.5"/>
+                </svg>
+                <div>
+                    <h1 class="logo-text"><a href="index.php">NK Strip</a></h1>
+                    <span class="logo-sub">Tekenwedstrijd</span>
+                </div>
+            </div>
+            <div>
+                <a href="index.php" class="btn btn-secondary">
+                    &larr; Back to Gallery
+                </a>
+            </div>
+        </header>
+
+        <!-- PORTFOLIO HEADER -->
+        <div class="portfolio-header">
+            <h2 class="portfolio-title"><?= htmlspecialchars($participant->name) ?>'s Portfolio</h2>
+            <div class="portfolio-age">Age Category: <?= htmlspecialchars($participant->age_category) ?> Years</div>
+        </div>
+
+        <!-- ARTWORKS GALLERY -->
+        <div class="artworks-grid">
+            <?php foreach ($artworks as $index => $art): ?>
+                <div class="artwork-card">
+                    <h3 style="text-align: center; margin-bottom: 10px; font-family: var(--font-heading);">Artwork #<?= $index + 1 ?></h3>
+                    <img src="<?= htmlspecialchars($art) ?>" alt="Artwork by <?= htmlspecialchars($participant->name) ?>">
+                </div>
+            <?php endforeach; ?>
+        </div>
+
+        <!-- VOTE BUTTON -->
+        <div class="vote-section">
+            <button onclick="openVoteModal('<?= htmlspecialchars($participant->username_id) ?>', '<?= rawurlencode($participant->name) ?>')" class="btn btn-primary vote-btn-large">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 10px;"><path d="M14 9V5a3 3 0 0 0-3-3l-4 9v11h11.28a2 2 0 0 0 2-1.7l1.38-9a2 2 0 0 0-2-2.3zM7 22H4a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h3"></path></svg>
+                Vote for <?= htmlspecialchars($participant->name) ?>!
+            </button>
+            <p style="margin-top: 15px; color: var(--text-muted); font-weight: 500;">Show your support by casting a vote!</p>
+        </div>
+        
+    </div>
+
+    <!-- VOTE EMAIL MODAL -->
+    <div id="vote-modal" class="modal-overlay">
+        <div class="modal-card">
+            <button class="modal-close" onclick="closeVoteModal()">&times;</button>
+            <h3 id="vote-modal-title" class="modal-title">Cast Vote</h3>
+            
+            <form id="vote-form">
+                <div class="form-group">
+                    <label class="form-label" for="voter-email">Your Email Address</label>
+                    <input type="email" id="voter-email" class="form-input" placeholder="e.g. yourname@example.com" required>
+                    <span style="font-size:0.8rem; color:var(--text-muted); margin-top:5px;">We strictly limit voting to 1 vote per email address to prevent duplicate votes.</span>
+                </div>
+
+                <div id="vote-feedback" class="form-group" style="display:none;"></div>
+
+                <div style="display:flex; justify-content:flex-end; gap:10px; margin-top:30px;">
+                    <button type="button" class="btn btn-secondary" onclick="closeVoteModal()">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Confirm Vote</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script src="assets/script.js"></script>
+</body>
+</html>
