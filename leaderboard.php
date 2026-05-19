@@ -115,17 +115,9 @@ try {
     <div class="container">
         <!-- HEADER -->
         <header>
-            <div class="logo-container">
-                <svg width="64" height="64" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg" style="transform: rotate(-5deg); filter: drop-shadow(2px 3px 0px #1a1a1a);">
-                    <circle cx="32" cy="32" r="30" fill="#ffeb3b" stroke="#1a1a1a" stroke-width="3"/>
-                    <path d="M12 18L14 14L18 12L14 10L12 6L10 10L6 12L10 14L12 18Z" fill="#ff5722"/>
-                    <path d="M48 45L49 42L52 41L49 40L48 37L47 40L44 41L47 42L48 45Z" fill="#e91e63"/>
-                </svg>
-                <div>
-                    <h1 class="logo-text"><a href="index.php">NK Strip</a></h1>
-                    <span class="logo-sub">Live Leaderboard</span>
-                </div>
-            </div>
+                        <a href="https://www.stripplaza.nl/">
+            <img src="assets/images/header/logo.png" alt="Logo" width="150" height="120" class="header-logo header-logo primary">
+        </a>
             <div>
                 <a href="index.php" class="btn btn-secondary">
                     &larr; Back to Gallery

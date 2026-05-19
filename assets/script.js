@@ -6,13 +6,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // --- VOTE MODAL LOGIC ---
     let activeUsernameId = '';
     const voteForm = document.getElementById('vote-form');
-<<<<<<< HEAD
     const voterEmailInput = document.getElementById('voter-email');
-=======
-    const voterNameInput = document.getElementById('voter-name');
-    const voterEmailInput = document.getElementById('voter-email');
-    const voteAgeCategoryInput = document.getElementById('vote-age-category');
->>>>>>> origin/taiyob
     const voteModalTitle = document.getElementById('vote-modal-title');
     const voteFeedback = document.getElementById('vote-feedback');
     
@@ -28,22 +22,13 @@ document.addEventListener('DOMContentLoaded', () => {
     window.openVoteModal = function(usernameId, name) {
         activeUsernameId = usernameId;
         voteModalTitle.innerText = `Cast Vote for ${decodeURIComponent(name)}`;
-<<<<<<< HEAD
         voterEmailInput.value = '';
-=======
-        if (voterNameInput) voterNameInput.value = '';
-        if (voterEmailInput) voterEmailInput.value = '';
->>>>>>> origin/taiyob
         voteFeedback.className = 'form-group';
         voteFeedback.innerHTML = '';
         voteFeedback.style.display = 'none';
         
         voteModal.classList.add('active');
-<<<<<<< HEAD
         voterEmailInput.focus();
-=======
-        if (voterNameInput) voterNameInput.focus();
->>>>>>> origin/taiyob
     };
 
     window.closeVoteModal = function() {
@@ -55,15 +40,8 @@ document.addEventListener('DOMContentLoaded', () => {
     if (voteForm) {
         voteForm.addEventListener('submit', (e) => {
             e.preventDefault();
-<<<<<<< HEAD
             const email = voterEmailInput.value.trim();
             if (!email) return;
-=======
-            const name = voterNameInput ? voterNameInput.value.trim() : '';
-            const email = voterEmailInput ? voterEmailInput.value.trim() : '';
-            const ageCategory = voteAgeCategoryInput ? voteAgeCategoryInput.value.trim() : '';
-            if (!email || !name) return;
->>>>>>> origin/taiyob
 
             // Show loading state
             const submitBtn = voteForm.querySelector('button[type="submit"]');
@@ -76,11 +54,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 headers: {
                     'Content-Type': 'application/x-www-form-urlencoded',
                 },
-<<<<<<< HEAD
                 body: `username_id=${encodeURIComponent(activeUsernameId)}&voter_email=${encodeURIComponent(email)}`
-=======
-                body: `username_id=${encodeURIComponent(activeUsernameId)}&voter_name=${encodeURIComponent(name)}&voter_email=${encodeURIComponent(email)}&age_category=${encodeURIComponent(ageCategory)}`
->>>>>>> origin/taiyob
             })
             .then(res => res.json())
             .then(data => {
@@ -90,21 +64,12 @@ document.addEventListener('DOMContentLoaded', () => {
                 voteFeedback.style.display = 'block';
                 if (data.status === 'success') {
                     voteFeedback.innerHTML = `<div class="alert alert-success">${data.message}</div>`;
-<<<<<<< HEAD
                     voterEmailInput.value = '';
-=======
-                    if (voterNameInput) voterNameInput.value = '';
-                    if (voterEmailInput) voterEmailInput.value = '';
->>>>>>> origin/taiyob
                     
                     // Close modal after success
                     setTimeout(() => {
                         closeVoteModal();
-<<<<<<< HEAD
                     }, 2000);
-=======
-                    }, 4000);
->>>>>>> origin/taiyob
                 } else {
                     voteFeedback.innerHTML = `<div class="alert alert-danger">${data.message}</div>`;
                 }
