@@ -109,18 +109,9 @@ try {
     <div class="container">
         <!-- HEADER -->
         <header>
-            <div class="logo-container">
-                <svg width="64" height="64" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg" style="transform: rotate(-5deg); filter: drop-shadow(2px 3px 0px #1a1a1a);">
-                    <circle cx="32" cy="32" r="30" fill="#ffeb3b" stroke="#1a1a1a" stroke-width="3"/>
-                    <path d="M18 46L24 40L42 22C44 20 47 20 49 22C51 24 51 27 49 29L31 47L25 47L18 46Z" fill="#2196f3" stroke="#1a1a1a" stroke-width="2.5"/>
-                    <path d="M42 22L47 27" stroke="#1a1a1a" stroke-width="2.5"/>
-                    <path d="M18 46L21 43L24 40L25 47L18 46Z" fill="#ff8a80" stroke="#1a1a1a" stroke-width="1.5"/>
-                </svg>
-                <div>
-                    <h1 class="logo-text"><a href="index.php">NK Strip</a></h1>
-                    <span class="logo-sub">Tekenwedstrijd</span>
-                </div>
-            </div>
+                        <a href="https://www.stripplaza.nl/">
+            <img src="assets/images/header/logo.png" alt="Logo" width="150" height="120" class="header-logo header-logo primary">
+        </a>
             <div>
                 <a href="index.php" class="btn btn-secondary">
                     &larr; Back to Gallery
