@@ -1,6 +1,15 @@
 <?php
 header('Content-Type: application/json');
 require_once 'config/db.php';
+require_once 'config/mail.php';
+
+// Load PHPMailer
+require_once 'vendor/PHPMailer/src/Exception.php';
+require_once 'vendor/PHPMailer/src/PHPMailer.php';
+require_once 'vendor/PHPMailer/src/SMTP.php';
+
+use PHPMailer\PHPMailer\PHPMailer;
+use PHPMailer\PHPMailer\Exception;
 
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     echo json_encode([
@@ -19,7 +28,7 @@ $age_category = trim($_POST['age_category'] ?? '');
 if (empty($username_id) || empty($voter_email) || empty($voter_name)) {
     echo json_encode([
         'status' => 'error',
-        'message' => 'Please provide your name, email address, and select a participant.'
+        'message' => "Please provide your name, email address, and select a participant. (Debug: username_id='$username_id', voter_name='$voter_name', voter_email='$voter_email')"
     ]);
     exit;
 }
@@ -108,10 +117,6 @@ try {
     $subject = "Confirm Your Vote - NK Strip Tekenwedstrijd";
     $to = $voter_email;
     
-    $headers = "MIME-Version: 1.0" . "\r\n";
-    $headers .= "Content-type:text/html;charset=UTF-8" . "\r\n";
-    $headers .= "From: NK Strip Tekenwedstrijd <noreply@stripplaza.nl>" . "\r\n";
-
     $message = "
     <html>
     <head>
@@ -147,8 +152,30 @@ try {
     </html>
     ";
 
-    // 9. Attempt to send email
-    $mail_sent = @mail($to, $subject, $message, $headers);
+    // 9. Send email using PHPMailer
+    $mail = new PHPMailer(true);
+    $mail_success = false;
+    try {
+        $mail->isSMTP();
+        $mail->Host       = SMTP_HOST;
+        $mail->SMTPAuth   = true;
+        $mail->Username   = SMTP_USERNAME;
+        $mail->Password   = SMTP_PASSWORD;
+        $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
+        $mail->Port       = SMTP_PORT;
+
+        $mail->setFrom(SMTP_FROM_EMAIL, SMTP_FROM_NAME);
+        $mail->addAddress($to, $voter_name);
+
+        $mail->isHTML(true);
+        $mail->Subject = $subject;
+        $mail->Body    = $message;
+
+        $mail->send();
+        $mail_success = true;
+    } catch (Exception $e) {
+        error_log("Mail Error: {$mail->ErrorInfo}");
+    }
 
     // 10. For local XAMPP testing, write details to a local text file so they can easily click it!
     $log_entry = "=====================================================================\n";

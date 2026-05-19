@@ -194,7 +194,14 @@ try {
             <h3 id="vote-modal-title" class="modal-title">Cast Vote</h3>
             
             <form id="vote-form">
+                <input type="hidden" id="vote-age-category" value="<?= htmlspecialchars($selected_category) ?>">
+
                 <div class="form-group">
+                    <label class="form-label" for="voter-name">Your Full Name</label>
+                    <input type="text" id="voter-name" class="form-input" placeholder="e.g. John Doe" required>
+                </div>
+
+                <div class="form-group" style="margin-top:15px;">
                     <label class="form-label" for="voter-email">Your Email Address</label>
                     <input type="email" id="voter-email" class="form-input" placeholder="e.g. yourname@example.com" required>
                     <span style="font-size:0.8rem; color:var(--text-muted); margin-top:5px;">We strictly limit voting to 1 vote per email address to prevent duplicate votes.</span>
