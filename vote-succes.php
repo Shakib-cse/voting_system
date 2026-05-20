@@ -52,7 +52,7 @@ if (!empty($token)) {
     <link rel="stylesheet" href="assets/style.css">
     <style>
         .success-wrapper {
-            max-width: 650px;
+            max-width: 1200px;
             margin: 60px auto;
             background: #ffffff;
             border: 3px solid var(--border-color);
@@ -62,6 +62,19 @@ if (!empty($token)) {
             text-align: center;
             position: relative;
             overflow: hidden;
+        }
+
+        .success-image-container {
+            margin: 0 auto 30px auto;
+            width: 100%;
+            max-width: 300px;
+        }
+
+        .success-image-container img {
+            width: 100%;
+            height: auto;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
         }
 
         .success-icon-container {
@@ -116,16 +129,9 @@ if (!empty($token)) {
     <div class="container">
         <!-- HEADER -->
         <header>
-            <div class="logo-container">
-                <svg width="48" height="48" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="transform: rotate(-5deg); filter: drop-shadow(2px 3px 0px #1a1a1a);">
-                    <circle cx="12" cy="12" r="10" fill="#ffeb3b" stroke="#1a1a1a" stroke-width="2.5"/>
-                    <path d="M12 5L14.24 9.55L19.24 10.27L15.62 13.8L16.48 18.8L12 16.4L7.52 18.8L8.38 13.8L4.76 10.27L9.76 9.55L12 5Z" fill="#ff5722" stroke="#1a1a1a" stroke-width="1.5"/>
-                </svg>
-                <div>
-                    <h1 class="logo-text"><a href="index.php">NK Strip</a></h1>
-                    <span class="logo-sub">Tekenwedstrijd</span>
-                </div>
-            </div>
+            <a href="https://www.stripplaza.nl/">
+            <img src="assets/images/header/logo.png" alt="Logo" width="150" height="120" class="header-logo header-logo primary">
+        </a>
             <div>
                 <a href="index.php" class="btn btn-secondary">
                     Go to Gallery
@@ -136,6 +142,11 @@ if (!empty($token)) {
         <!-- STATUS DISPLAY CARD -->
         <div class="success-wrapper">
             <?php if ($status === 'success'): ?>
+                <!-- Success Image -->
+                <div class="success-image-container">
+                    <img src="assets/images/success/spider-img.png" alt="Success Spiderman" loading="lazy">
+                </div>
+                
                 <div class="success-icon-container status-success">
                     <!-- Checkmark SVG -->
                     <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#1a1a1a" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
