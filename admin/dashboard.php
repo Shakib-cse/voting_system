@@ -9,16 +9,35 @@ if (!isset($_SESSION['admin_logged']) || $_SESSION['admin_logged'] !== true) {
 }
 
 try {
-    // 1. Get overall counts
-    $total_participants = $pdo->query("SELECT COUNT(*) FROM participants")->fetchColumn();
-    $total_votes = $pdo->query("SELECT COUNT(*) FROM votes")->fetchColumn();
+    // 1. Get overall counts using UNION ALL
+    $total_participants_stmt = $pdo->query("
+        SELECT SUM(cnt) FROM (
+            SELECT COUNT(*) as cnt FROM participants_9_11
+            UNION ALL
+            SELECT COUNT(*) as cnt FROM participants_12_14
+            UNION ALL
+            SELECT COUNT(*) as cnt FROM participants_15_17
+        ) as total
+    ");
+    $total_participants = $total_participants_stmt->fetchColumn() ?: 0;
+    
+    $total_votes = $pdo->query("SELECT COUNT(*) FROM votes")->fetchColumn() ?: 0;
+
+    // Create a view or CTE in query to combine participants
+    $participants_cte = "
+        SELECT id, username_id, name, email, page_1, page_2, page_3, views, created_at, '9-11' as age_category FROM participants_9_11
+        UNION ALL
+        SELECT id, username_id, name, email, page_1, page_2, page_3, views, created_at, '12-14' as age_category FROM participants_12_14
+        UNION ALL
+        SELECT id, username_id, name, email, page_1, page_2, page_3, views, created_at, '15-17' as age_category FROM participants_15_17
+    ";
 
     // 2. Get leader / winning artist details
     $leader_stmt = $pdo->query("
         SELECT p.name, COUNT(v.id) AS vote_count 
-        FROM participants p 
-        LEFT JOIN votes v ON p.username_id = v.username_id 
-        GROUP BY p.id 
+        FROM ($participants_cte) p 
+        LEFT JOIN votes v ON p.username_id = v.username_id AND v.is_confirmed = 1
+        GROUP BY p.username_id 
         ORDER BY vote_count DESC 
         LIMIT 1
     ");
@@ -28,10 +47,10 @@ try {
     // 3. Fetch participants list with counts
     $participants_stmt = $pdo->query("
         SELECT p.*, COUNT(v.id) AS vote_count 
-        FROM participants p 
-        LEFT JOIN votes v ON p.username_id = v.username_id 
-        GROUP BY p.id 
-        ORDER BY vote_count DESC, p.id DESC
+        FROM ($participants_cte) p 
+        LEFT JOIN votes v ON p.username_id = v.username_id AND v.is_confirmed = 1
+        GROUP BY p.username_id 
+        ORDER BY vote_count DESC, p.created_at DESC
     ");
     $participants = $participants_stmt->fetchAll();
 
@@ -39,7 +58,7 @@ try {
     $votes_stmt = $pdo->query("
         SELECT v.*, p.name AS candidate_name 
         FROM votes v 
-        JOIN participants p ON v.username_id = p.username_id 
+        JOIN ($participants_cte) p ON v.username_id = p.username_id 
         ORDER BY v.voted_at DESC 
         LIMIT 50
     ");
@@ -54,6 +73,37 @@ try {
         ORDER BY vote_count DESC
     ");
     $suspicious_ips = $suspicious_ip_stmt->fetchAll();
+
+    // 6. Handle Delete Action
+    if (isset($_POST['delete_item']) && isset($_POST['delete_id']) && isset($_POST['delete_category'])) {
+        $del_id = $_POST['delete_id'];
+        $del_cat = $_POST['delete_category'];
+        $valid_cats = ['9-11', '12-14', '15-17'];
+        
+        if (in_array($del_cat, $valid_cats)) {
+            $del_table = "participants_" . str_replace('-', '_', $del_cat);
+            // Start transaction
+            $pdo->beginTransaction();
+            try {
+                // Delete votes for this participant
+                $del_votes_stmt = $pdo->prepare("DELETE FROM votes WHERE username_id = ?");
+                $del_votes_stmt->execute([$del_id]);
+                
+                // Delete participant
+                $del_part_stmt = $pdo->prepare("DELETE FROM `$del_table` WHERE username_id = ?");
+                $del_part_stmt->execute([$del_id]);
+                
+                $pdo->commit();
+                
+                // Redirect to refresh page without form resubmission
+                header("Location: dashboard.php?msg=deleted");
+                exit;
+            } catch (Exception $e) {
+                $pdo->rollBack();
+                $error_msg = "Failed to delete item: " . $e->getMessage();
+            }
+        }
+    }
 
 } catch (PDOException $e) {
     die("Database stats fetch failed: " . $e->getMessage());
@@ -143,6 +193,7 @@ function getAdminImagePath($path) {
                         <th>Email (Private)</th>
                         <th>Pages</th>
                         <th>Votes</th>
+                        <th>Actions</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -179,11 +230,21 @@ function getAdminImagePath($path) {
                                 <td>
                                     <span class="admin-badge admin-badge-votes"><?= htmlspecialchars($p->vote_count) ?> votes</span>
                                 </td>
+                                <td>
+                                    <div style="display: flex; gap: 5px;">
+                                        <a href="voters.php?id=<?= urlencode($p->username_id) ?>&category=<?= urlencode($p->age_category) ?>" class="btn btn-secondary" style="padding: 4px 8px; font-size: 0.8rem;">View Voters</a>
+                                        <form method="POST" onsubmit="return confirm('Are you sure you want to delete this participant and all their votes?');" style="margin: 0;">
+                                            <input type="hidden" name="delete_id" value="<?= htmlspecialchars($p->username_id) ?>">
+                                            <input type="hidden" name="delete_category" value="<?= htmlspecialchars($p->age_category) ?>">
+                                            <button type="submit" name="delete_item" class="btn" style="padding: 4px 8px; font-size: 0.8rem; background-color: #cf1322; color: white; border: none; border-radius: 4px; cursor: pointer;">Delete</button>
+                                        </form>
+                                    </div>
+                                </td>
                             </tr>
                         <?php endforeach; ?>
                     <?php else: ?>
                         <tr>
-                            <td colspan="7" style="text-align:center; color:var(--text-muted); padding:30px;">No registered participants yet.</td>
+                            <td colspan="8" style="text-align:center; color:var(--text-muted); padding:30px;">No registered participants yet.</td>
                         </tr>
                     <?php endif; ?>
                 </tbody>
