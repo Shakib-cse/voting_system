@@ -114,8 +114,8 @@ try {
 <body>
     <div class="container">
         <!-- HEADER -->
-        <header>
-                        <a href="https://www.stripplaza.nl/">
+        <div>
+                        <a href="https://voting-system.stripplaza.nl/">
             <img src="assets/images/header/logo.png" alt="Logo" width="150" height="120" class="header-logo header-logo primary">
         </a>
             <div>
@@ -123,7 +123,7 @@ try {
                     &larr; Back to Gallery
                 </a>
             </div>
-        </header>
+        </d>
 
         <div class="leaderboard-header">
             <h2 class="leaderboard-title">Top Voted Artists</h2>

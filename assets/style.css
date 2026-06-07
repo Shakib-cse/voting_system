@@ -398,6 +398,74 @@ header {
   outline: none;
 }
 
+/* --- RESPONSIVE HEADER FIXES --- */
+@media (max-width: 1200px) {
+  /* Position two header images fixed top-left and top-right on small/tablet screens
+     and control their sizes via CSS (override HTML width/height attributes). */
+  :root {
+    /* Increase size for tablet-like viewports; change this value to adjust */
+    --header-logo-size: 120px;
+  }
+
+  .header-logo-link {
+    position: absolute !important;
+    top: 12px !important;
+    left: 12px !important;
+    right: auto !important;
+    margin: 0 !important;
+    z-index: 999 !important;
+  }
+
+  .header-logo-secondary {
+    position: absolute !important;
+    top: 12px !important;
+    right: 12px !important;
+    left: auto !important;
+    margin: 0 !important;
+    z-index: 999 !important;
+  }
+
+  /* Force both logos to the same square size and preserve aspect using object-fit */
+  .header-logo-link img,
+  .header-logo-secondary {
+    width: var(--header-logo-size) !important;
+    height: var(--header-logo-size) !important;
+    object-fit: contain !important;
+    max-width: 45% !important;
+    display: block;
+  }
+
+  /* Reserve space within the header so absolutely positioned logos don't overlap content */
+  header {
+    position: relative;
+    padding-top: calc(var(--header-logo-size) + 24px);
+  }
+
+  /* Reduce banner and category image sizes to avoid layout collisions */
+  .festival-banner {
+    max-width: 260px;
+    justify-content: center;
+    text-align: center;
+    margin: 6px auto 0 auto;
+  }
+
+  .categories-container {
+    gap: 16px;
+    padding-top: 10px;
+  }
+
+  .category-btn,
+  .bubble-tab {
+    max-width: 96px;
+  }
+
+  /* Ensure main header content stacks nicely */
+  header {
+    align-items: flex-start;
+    gap: 12px;
+  }
+}
+
 .btn:active {
   transform: translateY(2px);
   box-shadow: 0px 2px 0px var(--border-color);
@@ -683,6 +751,107 @@ footer {
   }
   100% {
     transform: scale(1.08);
+  }
+}
+
+/* --- ADMIN DASHBOARD RESPONSIVE RULES --- */
+/* Two-column dashboard section: Recent votes + Suspicious IPs */
+.dashboard-two-col {
+  display: flex;
+  gap: 30px;
+  align-items: flex-start;
+  flex-wrap: wrap;
+}
+
+/* Make first column take ~2x space and second column ~1x */
+.dashboard-two-col > div:first-child {
+  flex: 2 1 60%;
+  min-width: 280px;
+}
+.dashboard-two-col > div:nth-child(2) {
+  flex: 1 1 30%;
+  min-width: 220px;
+}
+
+/* Make admin tables horizontally scrollable on small screens */
+.admin-table-container {
+  overflow: auto;
+}
+
+/* Adjust admin nav and stats grid for smaller viewports */
+@media (max-width: 1200px) {
+  .admin-nav {
+    align-items: center;
+    gap: 16px;
+  }
+  .admin-nav img.header-logo {
+    max-width: 140px;
+    height: auto;
+  }
+  .admin-stats-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 18px;
+  }
+}
+
+@media (max-width: 768px) {
+  .container {
+    padding: 16px;
+  }
+  .admin-nav {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+  }
+  .admin-nav img.header-logo {
+    max-width: 120px;
+  }
+  .admin-stats-grid {
+    grid-template-columns: 1fr;
+  }
+  .admin-stat-card {
+    padding: 14px;
+  }
+  .admin-participant-thumb {
+    width: 44px;
+    height: 44px;
+  }
+  .admin-table th,
+  .admin-table td {
+    padding: 8px 10px;
+  }
+  .dashboard-two-col {
+    /* ensure flex children stack full width on small screens */
+    /* for older codepaths that used grid, override to full-width flex items */
+  }
+  .dashboard-two-col > div {
+    flex: 1 1 100%;
+    min-width: 0;
+  }
+}
+
+@media (max-width: 480px) {
+  .admin-nav img.header-logo {
+    max-width: 96px;
+  }
+  .admin-stat-value {
+    font-size: 1.25rem;
+  }
+  .admin-table {
+    font-size: 0.82rem;
+  }
+  .admin-table th,
+  .admin-table td {
+    padding: 6px 8px;
+  }
+  .admin-table td {
+    white-space: nowrap;
+  }
+  /* reduce action button sizes */
+  td .btn {
+    padding: 6px 8px;
+    font-size: 0.75rem;
   }
 }
 
@@ -1032,5 +1201,36 @@ footer {
   .festival-banner {
     max-width: 100%;
     text-align: left;
+  }
+
+  /* Stack action buttons under intro text on small devices */
+  .intro-text-box {
+    font-size: 1rem;
+    padding: 12px 10px;
+  }
+
+  /* Target the action container immediately following the intro text */
+  .intro-text-box + div {
+    display: flex !important;
+    flex-direction: column;
+    align-items: stretch;
+    justify-content: center;
+    gap: 10px;
+    margin-bottom: 18px;
+    width: 100%;
+  }
+
+  .intro-text-box + div a.btn {
+    width: 100%;
+    justify-content: center;
+    padding: 10px 14px;
+    font-size: 0.95rem;
+    white-space: normal;
+    box-sizing: border-box;
+  }
+
+  .intro-text-box + div a.btn svg {
+    margin-right: 8px;
+    flex-shrink: 0;
   }
 }

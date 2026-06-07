@@ -50,7 +50,7 @@ try {
 <body>
     <!-- HEADER -->
     <header>
-        <a href="https://www.stripplaza.nl/" class="header-logo-link">
+        <a href="https://voting-system.stripplaza.nl/" class="header-logo-link">
             <img src="assets/images/header/logo.png" alt="Logo" width="200" height="300" class="header-logo header-logo primary">
         </a>
                 <!-- CATEGORIES AS COMIC SPEECH BUBBLES -->
@@ -75,10 +75,10 @@ try {
 
         <!-- INTROTEXT -->
         <div class="intro-text-box">
-            Hier komt een tekst over de verkiezingen. Kies hieronder je favoriete striptekening van de finalisten en breng direct je stem uit om jouw favoriet te steunen!
+            Kies je favoriete finalist en stem direct!
         </div>
 
-        <div style="display: flex; justify-content: flex-end; gap: 15px; margin-bottom: 25px;">
+        <div style="display: flex; justify-content: center; gap: 15px; margin-bottom: 25px;">
             <a href="leaderboard.php" class="btn btn-secondary" style="border-color:var(--accent-color); color:var(--accent-color); font-weight:700;">
                 <!-- Trophy Icon -->
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"></path><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"></path><path d="M4 22h16"></path><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"></path><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"></path><path d="M18 2H6v7a6 6 0 0 0 12 0V2z"></path></svg>

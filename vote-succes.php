@@ -129,7 +129,7 @@ if (!empty($token)) {
     <div class="container">
         <!-- HEADER -->
         <header>
-            <a href="https://www.stripplaza.nl/">
+            <a href="https://voting-system.stripplaza.nl/">
             <img src="assets/images/header/logo.png" alt="Logo" width="150" height="120" class="header-logo header-logo primary">
         </a>
             <div>

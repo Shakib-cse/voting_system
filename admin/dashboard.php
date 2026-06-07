@@ -141,10 +141,9 @@ function getAdminImagePath($path) {
     <div class="container" style="max-width: 1300px;">
         <!-- ADMIN NAVIGATION -->
         <div class="admin-nav">
-            <div>
-                <span class="admin-nav-title">NK Strip</span>
-                <span class="logo-sub" style="margin-left: 10px; font-size: 0.8rem; vertical-align: middle;">Dashboard</span>
-            </div>
+            <a href="https://voting-system.stripplaza.nl/">
+            <img src="../assets/images/header/logo.png" alt="Logo" width="150" height="120">
+        </a>
             <div style="display:flex; gap:12px; align-items:center;">
                 <span style="font-weight:600; font-size:0.9rem;">Logged in as: <u><?= htmlspecialchars($_SESSION['admin_user']) ?></u></span>
                 <a href="logout.php" class="btn btn-secondary" style="padding: 6px 16px; font-size: 0.85rem; border-width: 2px; box-shadow: 0 2px 0 var(--border-color);">
@@ -251,7 +250,7 @@ function getAdminImagePath($path) {
             </table>
         </div>
 
-        <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 30px; align-items: start;">
+        <div class="dashboard-two-col">
             <!-- RECENT VOTES LOG -->
             <div>
                 <h2 class="section-title">
