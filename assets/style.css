@@ -5,8 +5,8 @@
   --primary-color: #52c41a; /* Vibrant Comic Green */
   --primary-hover: #389e0d;
   --accent-color: #ff4d4f; /* Comic Orange/Red */
-  --bg-color: #faf9f6; /* Off-white warm paper */
-  --card-bg: #ffffff;
+  --bg-color: #ffffff; /* Off-white warm paper */
+  --card-bg: #faf9f6;
   --text-main: #1a1a1a;
   --text-muted: #5e5e5e;
   --border-color: #1a1a1a;
@@ -24,10 +24,10 @@
 
 body {
   background-color: var(--bg-color);
-  background-image: radial-gradient(
+  /* background-image: radial-gradient(
     rgba(26, 26, 26, 0.05) 1.5px,
     transparent 1.5px
-  );
+  ); */
   background-size: 16px 16px;
   color: var(--text-main);
   font-family: var(--font-body);
@@ -235,8 +235,6 @@ header {
   font-size: 1.1rem;
   font-style: italic;
   color: var(--text-muted);
-  border-left: 4px solid var(--primary-color);
-  border-right: 4px solid var(--primary-color);
   padding: 0 20px;
 }
 
@@ -244,7 +242,7 @@ header {
 .participants-grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: 25px 200px;
+  gap: 40px 50px;
   margin-bottom: 40px;
 }
 
