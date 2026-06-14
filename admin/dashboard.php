@@ -154,6 +154,19 @@ function getAdminImagePath($path) {
             </div>
         </div>
 
+                <div style="display: flex; justify-content: center; gap: 15px; margin-bottom: 50px;">
+            <a href="leaderboard.php" class="btn btn-secondary" style="border-color:var(--accent-color); color:var(--accent-color); font-weight:700;">
+                <!-- Trophy Icon -->
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"></path><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"></path><path d="M4 22h16"></path><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"></path><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"></path><path d="M18 2H6v7a6 6 0 0 0 12 0V2z"></path></svg>
+                View Leaderboard
+            </a>
+            <a href="upload.php" class="btn btn-secondary" style="border-color:var(--text-main); font-weight:700;">
+                <!-- Register / Upload Icon -->
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="12" y1="18" x2="12" y2="12"></line><line x1="9" y1="15" x2="15" y2="15"></line></svg>
+                Register &amp; Submit Comic
+            </a>
+        </div>
+
         <!-- STATISTICS GRID -->
         <div class="admin-stats-grid">
             <div class="admin-stat-card">
